@@ -1,0 +1,147 @@
+import java.io.*;
+import java.math.BigInteger;
+import java.text.DecimalFormat;
+import java.util.*;
+
+public class Main {
+    static int MAX = (int) (1e7) + 1;//max prime number is 9999991
+    static ArrayList<Integer> primes = new ArrayList<>();
+    static boolean[] prime = new boolean[MAX];
+
+
+    static class pair implements Comparable<pair> {
+        char x;
+        int y;
+
+        pair(char x, int y) {
+            this.x = x;
+            this.y = y;
+        }
+
+        public int compareTo(pair p) {
+            if (x > p.x)
+                return -1;
+            if (x == p.x)
+                return 0;
+            return 1;
+        }
+
+    }
+
+    static long pow(long a, int e) {
+        long res = 1;
+        while (e > 0) {
+            //BigInteger a2=new BigInteger(""+a);
+            res = res * a;
+            e--;
+        }
+        return res;
+    }
+
+    static void seive() {
+        Arrays.fill(prime, true);
+        prime[0] = prime[1] = false;
+        int i = 2;
+        for (; i * i < prime.length; i++) {
+            if (prime[i]) {
+                primes.add(i);
+                for (int j = i * i; j < prime.length; j += i) {
+                    prime[j] = false;
+                }
+            }
+        }
+        for (; i < prime.length; i++) {
+            if (prime[i])
+                primes.add(i);
+        }
+    }
+
+    static long gcd(long a, long b) {
+        if (b == 0)
+            return a;
+        return gcd(b, a % b);
+    }
+
+    static long lcm(long a, long b) {
+        return a * (b / gcd(a, b));
+    }
+
+    static boolean isPrime(long N) {
+        if (N < prime.length)
+            return prime[(int) N];
+        else {
+            for (int i = 0; i < primes.size(); i++) {
+                if (N % primes.get(i) == 0)
+                    return false;
+            }
+        }
+        return true;
+    }
+
+
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+//        BufferedReader br = new BufferedReader(new FileReader("input.txt"));
+        StringTokenizer st;
+        PrintWriter out = new PrintWriter(System.out);
+        int i = 1;
+        while (true) {
+            int n = Integer.parseInt(br.readLine());
+            HashMap<String, Integer> hm = new HashMap<>();
+            String[] names = new String[n];
+            for (int j = 0; j < n; j++) {
+                String name = br.readLine();
+                hm.put(name, j);
+                names[j] = name;
+            }
+            int[] inDegree = new int[n];
+            ArrayList<Integer>[] tree = new ArrayList[n];
+            for (int j = 0; j < tree.length; j++) {
+                tree[j] = new ArrayList<>();
+            }
+            int m = Integer.parseInt(br.readLine());
+            for (int j = 0; j < m; j++) {
+                st = new StringTokenizer(br.readLine());
+                String u = st.nextToken();
+                String v = st.nextToken();
+                int un = hm.get(u);
+                int vn = hm.get(v);
+                inDegree[vn]++;
+                tree[un].add(vn);
+            }
+            for (int j = 0; j < tree.length; j++) {
+                Collections.sort(tree[j]);
+            }
+            boolean visited[] = new boolean[n];
+            ArrayList<String> ans = new ArrayList<>();
+            int zeros = 0;
+            while (zeros < n) {
+                ArrayList<String> ans2 = new ArrayList<>();
+                for (int j = 0; j < n&&zeros<n; j++) {
+                    if (inDegree[j] == 0 && !visited[j]) {
+                        visited[j] = true;
+                        zeros++;
+                        ans.add(names[j]);
+                        for (int v : tree[hm.get(names[j])]) {
+                            inDegree[v]--;
+                        }
+                        j = -1;
+                    }
+                }
+            }
+
+            out.print("Case #" + i + ": Dilbert should drink beverages in this order: ");
+            for (int j = 0; j < ans.size() - 1; j++) {
+                out.print(ans.get(j) + " ");
+            }
+            out.println(ans.get(ans.size() - 1) +"."+ '\n');
+
+            br.readLine();
+            i++;
+            if (!br.ready())
+                break;
+
+        }
+        out.flush();
+    }
+}
