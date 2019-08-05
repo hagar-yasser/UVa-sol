@@ -1,0 +1,131 @@
+import java.io.*;
+import java.math.BigInteger;
+import java.text.DecimalFormat;
+import java.util.*;
+
+public class Main {
+    static int MAX = (int) (1e7) + 1;//max prime number is 9999991
+    static ArrayList<Integer> primes = new ArrayList<>();
+    static boolean[] prime = new boolean[MAX];
+    static boolean[]visited;
+    static int color[];
+    static  ArrayList<Integer>[]tree;
+
+    static class pair implements Comparable<pair> {
+        char x;
+        int y;
+
+        pair(char x, int y) {
+            this.x = x;
+            this.y = y;
+        }
+
+        public int compareTo(pair p) {
+            if (x > p.x)
+                return -1;
+            if (x == p.x)
+                return 0;
+            return 1;
+        }
+
+    }
+
+    static long pow(long a, int e) {
+        long res = 1;
+        while (e > 0) {
+            //BigInteger a2=new BigInteger(""+a);
+            res = res * a;
+            e--;
+        }
+        return res;
+    }
+
+    static void seive() {
+        Arrays.fill(prime, true);
+        prime[0] = prime[1] = false;
+        int i = 2;
+        for (; i * i < prime.length; i++) {
+            if (prime[i]) {
+                primes.add(i);
+                for (int j = i * i; j < prime.length; j += i) {
+                    prime[j] = false;
+                }
+            }
+        }
+        for (; i < prime.length; i++) {
+            if (prime[i])
+                primes.add(i);
+        }
+    }
+
+    static long gcd(long a, long b) {
+        if (b == 0)
+            return a;
+        return gcd(b, a % b);
+    }
+
+    static long lcm(long a, long b) {
+        return a * (b / gcd(a, b));
+    }
+
+    static boolean isPrime(long N) {
+        if (N < prime.length)
+            return prime[(int) N];
+        else {
+            for (int i = 0; i < primes.size(); i++) {
+                if (N % primes.get(i) == 0)
+                    return false;
+            }
+        }
+        return true;
+    }
+    static boolean dfs(int u){
+        for (int i = 0; i <tree[u].size(); i++) {
+            int v=tree[u].get(i);
+            if(visited[v]){
+                if(color[v]==color[u])
+                    return false;
+            }
+            else{
+                visited[v]=true;
+                color[v]=1-color[u];
+                if(!dfs(v))
+                    return false;
+            }
+        }
+        return true;
+    }
+
+
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+//        BufferedReader br = new BufferedReader(new FileReader("input.txt"));
+        StringTokenizer st;
+        PrintWriter out = new PrintWriter(System.out);
+        int n=Integer.parseInt(br.readLine());
+        while(n!=0){
+            tree=new ArrayList[n];
+            for (int i = 0; i <n ; i++) {
+                tree[i]=new ArrayList<>();
+            }
+            int l=Integer.parseInt(br.readLine());
+            for (int i = 0; i <l ; i++) {
+                st=new StringTokenizer(br.readLine());
+                int u=Integer.parseInt(st.nextToken());
+                int v=Integer.parseInt(st.nextToken());
+                tree[u].add(v);
+                tree[v].add(u);
+            }
+            visited=new boolean[n];
+            color=new int [n];
+            if(dfs(0)){
+                out.println("BICOLORABLE.");
+            }
+            else{
+                out.println("NOT BICOLORABLE.");
+            }
+            n=Integer.parseInt(br.readLine());
+        }
+        out.flush();
+    }
+}
