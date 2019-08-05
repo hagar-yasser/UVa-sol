@@ -1,0 +1,58 @@
+import java.io.*;
+import java.math.BigInteger;
+import java.text.DecimalFormat;
+import java.util.*;
+
+public class Main{
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        StringTokenizer st=new StringTokenizer(br.readLine());
+        PrintWriter out = new PrintWriter(System.out);
+        int n = Integer.parseInt(st.nextToken());
+        int m=Integer.parseInt(st.nextToken());
+        while(m!=0||n!=0){
+            ArrayList<Integer>[]tree=new ArrayList[n+1];
+            int [] inDegree=new int [n+1];
+            for (int i = 0; i <tree.length ; i++) {
+                tree[i]=new ArrayList<>();
+            }
+
+            for (int i = 0; i <m ; i++) {
+                st=new StringTokenizer(br.readLine());
+                int u=Integer.parseInt(st.nextToken());
+                int v=Integer.parseInt(st.nextToken());
+                inDegree[v]++;
+                tree[u].add(v);
+            }
+            boolean[]visited=new boolean[n+1];
+            ArrayList<Integer>ans=new ArrayList<>();
+            for (int i = 1; i <=n ; i++) {
+                if(inDegree[i]==0&&!visited[i]){
+                    LinkedList<Integer>queue=new LinkedList<>();
+                    queue.addLast(i);
+                    visited[i]=true;
+                    while (!queue.isEmpty()){
+                        int u=queue.poll();
+                        ans.add(u);
+                        for (int j = 0; j <tree[u].size() ; j++) {
+                            int v=tree[u].get(j);
+                            if(--inDegree[v]==0){
+                                queue.addLast(v);
+                                visited[v]=true;
+                            }
+                        }
+
+                    }
+                }
+            }
+            for (int i = 0; i <ans.size()-1 ; i++) {
+                out.print(ans.get(i)+" ");
+            }
+            out.println(ans.get(ans.size()-1));
+            st=new StringTokenizer(br.readLine());
+            n=Integer.parseInt(st.nextToken());
+            m=Integer.parseInt(st.nextToken());
+        }
+        out.flush();
+    }
+}
