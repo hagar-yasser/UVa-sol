@@ -1,0 +1,174 @@
+import java.io.*;
+import java.math.BigInteger;
+import java.text.DecimalFormat;
+import java.util.*;
+
+public class Main {
+    static int MAX = (int) (1e7) + 1;//max prime number is 9999991
+    static ArrayList<Integer> primes = new ArrayList<>();
+    static boolean[] prime = new boolean[MAX];
+    static boolean[] visited;
+    static int color[];
+    static ArrayList<Integer>[] tree;
+    static int zeros = 0;
+    static int ones = 0;
+    static int parent[];
+    static boolean isArticulation[];
+    static int []dfsNum;static int[]dfsLow;
+    static int counter;
+    static int root;static int rootChildren;
+    static class pair implements Comparable<pair> {
+        char x;
+        int y;
+
+        pair(char x, int y) {
+            this.x = x;
+            this.y = y;
+        }
+
+        public int compareTo(pair p) {
+            if (x > p.x)
+                return -1;
+            if (x == p.x)
+                return 0;
+            return 1;
+        }
+
+    }
+
+    static long pow(long a, int e) {
+        long res = 1;
+        while (e > 0) {
+            //BigInteger a2=new BigInteger(""+a);
+            res = res * a;
+            e--;
+        }
+        return res;
+    }
+
+    static void seive() {
+        Arrays.fill(prime, true);
+        prime[0] = prime[1] = false;
+        int i = 2;
+        for (; i * i < prime.length; i++) {
+            if (prime[i]) {
+                primes.add(i);
+                for (int j = i * i; j < prime.length; j += i) {
+                    prime[j] = false;
+                }
+            }
+        }
+        for (; i < prime.length; i++) {
+            if (prime[i])
+                primes.add(i);
+        }
+    }
+
+    static long gcd(long a, long b) {
+        if (b == 0)
+            return a;
+        return gcd(b, a % b);
+    }
+
+    static long lcm(long a, long b) {
+        return a * (b / gcd(a, b));
+    }
+
+    static boolean isPrime(long N) {
+        if (N < prime.length)
+            return prime[(int) N];
+        else {
+            for (int i = 0; i < primes.size(); i++) {
+                if (N % primes.get(i) == 0)
+                    return false;
+            }
+        }
+        return true;
+    }
+
+    static boolean bipartiteDfs(int u) {
+        visited[u] = true;
+        if (color[u] == 0)
+            zeros++;
+        else ones++;
+        for (int i = 0; i < tree[u].size(); i++) {
+            int v = tree[u].get(i);
+            if (visited[v]) {
+                if (color[v] == color[u])
+                    return false;
+            } else {
+                color[v] = 1 - color[u];
+                if (!bipartiteDfs(v))
+                    return false;
+            }
+        }
+        return true;
+    }
+    static void articulationPoint(int u,int parent){
+        dfsLow[u]=dfsNum[u]=++counter;
+        boolean leaf=tree[u].size()==1;
+        for (int i = 0; i <tree[u].size() ; i++) {
+            int v=tree[u].get(i);
+            if(v!=parent) {
+                if (dfsLow[v] == 0 && dfsNum[v] == 0) {
+                    if (u == root)
+                        rootChildren++;
+                    articulationPoint(v, u);
+                    dfsLow[u] = Math.min(dfsLow[u], dfsLow[v]);
+                    //System.out.println("u "+u+" v "+v);
+                    if(dfsLow[v]>=dfsNum[u])
+                        isArticulation[u]=true;
+                } else {
+                    if (dfsNum[v] < dfsLow[u])
+                        dfsLow[u] = dfsNum[v];
+                }
+            }
+        }
+
+    }
+
+
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+//        BufferedReader br = new BufferedReader(new FileReader("input.txt"));
+        StringTokenizer st;
+        PrintWriter out = new PrintWriter(System.out);
+        int n=Integer.parseInt(br.readLine());
+        while (n!=0){
+            counter=0;
+            tree=new ArrayList[n+1];
+            for (int i = 0; i <tree.length ; i++) {
+                tree[i]=new ArrayList<>();
+            }
+            parent=new int[n+1];
+            isArticulation=new boolean[n+1];
+            dfsLow=new int[n+1];
+            dfsNum=new int[n+1];
+            st=new StringTokenizer(br.readLine());
+            int u =Integer.parseInt(st.nextToken());
+            while(u!=0){
+                while(st.hasMoreTokens()){
+                    int v=Integer.parseInt(st.nextToken());
+                    tree[u].add(v);
+                    tree[v].add(u);
+                }
+                st=new StringTokenizer(br.readLine());
+                u=Integer.parseInt(st.nextToken());
+            }
+            root=1;
+            rootChildren=0;
+            articulationPoint(1,0);
+            isArticulation[root]=rootChildren>1;
+            int ans=0;
+//            for (int i = 1; i <=n ; i++) {
+//                out.println("dfsN= "+dfsNum[i]+" dfsL= "+dfsLow[i]);
+//            }
+            for (int i = 1; i <=n ; i++) {
+                ans=(isArticulation[i]?ans+1:ans);
+            }
+            out.println(ans);
+            n=Integer.parseInt(br.readLine());
+        }
+        out.flush();
+    }
+}
