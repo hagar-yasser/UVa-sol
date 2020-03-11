@@ -1,0 +1,106 @@
+import java.io.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.StringTokenizer;
+
+public class Main {
+    static class pair implements Comparable<pair> {
+        int x;
+        long keema;
+
+        public pair(int xx, long modd) {
+            x = xx;
+            keema = modd;
+        }
+
+        @Override
+        public int compareTo(pair o) {
+            if (keema < o.keema)
+                return -1;
+            if (keema > o.keema)
+                return 1;
+            return 0;
+        }
+    }
+
+    static int[][][] mem;
+    static int[][] preSum;
+    static int[] P, W;
+    static int N;
+
+    public static int dp(int r, int cb, int ce) {
+        if (r >= N)
+            return 0;
+        if (mem[r][cb][ce] != -1)
+            return mem[r][cb][ce];
+        int sum = preSum[r][ce];
+        if (cb != 0)
+            sum -= preSum[r][cb - 1];
+        if (sum <= 0)
+            return mem[r][cb][ce] = 0;
+        return mem[r][cb][ce] = Math.max(sum, sum + dp(r + 1, cb, ce));
+    }
+
+    public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        //BufferedReader br = new BufferedReader(new FileReader("e_so_many_books.txt"));
+        //PrintWriter out = new PrintWriter("a.out");
+        PrintWriter out = new PrintWriter(System.out);
+        StringTokenizer st;
+        int T = Integer.parseInt(br.readLine());
+        while (T-- > 0) {
+            N = Integer.parseInt(br.readLine());
+            mem=new int[N][N][N];
+            for (int i = 0; i <N ; i++) {
+                for (int j = 0; j <N ; j++) {
+                    Arrays.fill(mem[i][j],-1);
+                }
+            }
+            preSum=new int[N][N];
+            int x = Integer.parseInt(br.readLine());
+            int[][] in = new int[N][N];
+            int UNVALID=(int)1e6;
+            UNVALID*=-1;
+            for (int i = 0; i < N; i++) {
+                Arrays.fill(in[i], 1);
+            }
+            while (x-- > 0) {
+                st = new StringTokenizer(br.readLine());
+                int r1 = Integer.parseInt(st.nextToken())-1;
+                int c1 = Integer.parseInt(st.nextToken())-1;
+                int r2 = Integer.parseInt(st.nextToken())-1;
+                int c2 = Integer.parseInt(st.nextToken())-1;
+                for (int i = r1; i <=r2 ; i++) {
+                    for (int j = c1; j <=c2 ; j++) {
+                        in[i][j]=UNVALID;
+                    }
+                }
+            }
+            for (int i = 0; i <N ; i++) {
+                int sum=0;
+                for (int j = 0; j <N ; j++) {
+                    sum+=in[i][j];
+                    preSum[i][j]=sum;
+                }
+            }
+            int ans=0;
+            for (int i = 0; i <N ; i++) {
+                for (int j = 0; j <N ; j++) {
+                    for (int k = j; k <N ; k++) {
+                        ans=Math.max(ans,dp(i,j,k));
+                    }
+                }
+
+            }
+            out.println(ans);
+        }
+        out.flush();
+        out.close();
+
+    }
+
+
+}
+
+
